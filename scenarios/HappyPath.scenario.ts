@@ -21,16 +21,18 @@ import { sleep } from '../utils/sleep';
 import InstallApp from './tests/InstallApp';
 import UninstallApp from './tests/UninstallApp';
 import { Log } from '../utils/Log';
-import UpdateUSBControl from './tests/UpdateUSBControl';
-import UpdateAgentReleaseChannel from './tests/UpdateAgentReleaseChannel';
+// import UpdateUSBControl from './tests/UpdateUSBControl';
+// import UpdateAgentReleaseChannel from './tests/UpdateAgentReleaseChannel';
 
 // a popular JavaScript testing framework, to set the maximum timeout for asynchronous tests. It determines the maximum time (in milliseconds) that Jest will wait for a test to complete before considering it as failed due to a timeout.
 // This line effectively tells Jest to allow up to 3 minutes for each test to complete. If a test takes longer than this specified timeout, Jest will consider it as failed due to exceeding the timeout limit.
-jest.setTimeout(180_000);
+// jest.setTimeout(180_000);
 
 // fs and path are Node.js core modules used for working with files and directories.
-const fs = require('fs');
-const path = require('path');
+// const fs = require('fs');
+// const path = require('path');
+
+
 
 // global is a global object in Node.js, similar to window in a browser environment.
 // __DISPLAYS__ is a variable or property attached to the global object. It's using a naming convention with double underscores (__) to indicate that it might be a special or reserved variable.
