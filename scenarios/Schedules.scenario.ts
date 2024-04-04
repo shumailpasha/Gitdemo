@@ -6,13 +6,13 @@ import UpdatePowerSchedule from './tests/UpdatePowerSchedule';
 // import { client, poll } from '../apiClient/client';
 // import { Log } from '../utils/Log';
 
-jest.setTimeout(90_000);
+// jest.setTimeout(90_000);
 
 // const fs = require('fs');
 // const path = require('path');
 
-const fs = require('fs');
-const path = require('path');
+// const fs = require('fs');
+// const path = require('path');
 
 // const fs = require('fs');
 // const path = require('path');
