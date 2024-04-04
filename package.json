@@ -1,0 +1,52 @@
+// In the context of testing and running tasks, scripts such as "test", "test:simulator", "test:real", 
+// and others are defined. When you run one of these scripts using a command like yarn test or npm run test, the associated actions defined in the script will be executed.
+
+// yarn test:simulator will execute Jest tests specifically targeting the "Happy Path scenario".
+// Running yarn test:real will execute Jest tests with an environment variable (USE_REAL_DISPLAYS) set to 1 to indicate the use of real displays.
+{
+  "name": "e2e-jest",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "yarn jest", // Runs Jest tests using the yarn jest command.
+    "test:simulator": "yarn jest -- -t 'Happy Path scenario'", // Runs specific Jest tests related to the "Happy Path scenario" using the yarn jest command.
+    "test:real": "cross-env USE_REAL_DISPLAYS=1 yarn test -- -t 'Happy Path scenario'", //Runs Jest tests with an environment variable (USE_REAL_DISPLAYS) set to 1 to indicate the use of real displays.
+    "test:schedules": "cross-env USE_REAL_DISPLAYS=1 yarn test -- -t 'Automated power schedule' --runInBand", //Runs Jest tests for automated power schedules, again with the USE_REAL_DISPLAYS environment variable set to 1.
+    "format": "prettier --write **/*.ts", //Uses Prettier to format all TypeScript files (*.ts).
+    "codegen": "graphql-codegen --config codegen.yml" //Generates code using GraphQL Code Generator based on the configuration in the codegen.yml file.
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@babel/preset-env": "7.16.8",
+    "@graphql-codegen/cli": "2.5.0",
+    "@graphql-codegen/typescript": "2.4.3",
+    "@graphql-codegen/typescript-generic-sdk": "2.3.2",
+    "@graphql-codegen/typescript-graphql-request": "4.3.4",
+    "@graphql-codegen/typescript-operations": "2.2.4",
+    "@types/jest": "27.4.0",
+    "cross-env": "7.0.3",
+    "env-var": "7.1.1",
+    "graphql": "16.3.0",
+    "graphql-request": "3.7.0",
+    "husky": "4.3.8",
+    "jest": "27.4.7",
+    "jest-html-reporters": "3.0.3",
+    "lint-staged": "11.0.0",
+    "prettier": "2.3.1",
+    "ts-jest": "27.1.3",
+    "typescript": "4.5.5"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
+  },
+  "lint-staged": {
+    "*.ts": [
+      "prettier --write"
+    ]
+  }
+}

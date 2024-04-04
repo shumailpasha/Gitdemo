@@ -1,0 +1,19 @@
+{
+  "presets": [
+    [
+      "@babel/preset-env",
+      {
+        "targets": {
+          "node": "current"
+        }
+      }
+    ]
+  ]
+}
+
+/*
+This configuration is particularly useful in Node.js development where you want to make sure your code
+ is compatible with the version of Node.js you are currently using. 
+ It allows you to take advantage of the latest ECMAScript features 
+ while ensuring compatibility with your target Node.js version.
+*/

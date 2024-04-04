@@ -1,0 +1,213 @@
+stages:
+  - lint
+  - test
+  - deploy
+  - bootstrap
+
+default:
+  image: node:16.13.2
+
+.adb:
+  image: ${CI_REGISTRY}/tp-vision/ci/gitlab-builder-android:30
+  before_script:
+    - bash --version
+    - echo "$ADB_PRIVATE_KEY" | tr -d '\r' > ~/.android/adbkey
+    - echo "$ADB_PUBLIC_KEY" > ~/.android/adbkey.pub
+    - chmod -R 600 ~/.android/*
+    - mkdir -p ~/.ssh/itp/tpvision
+    - echo "$TEST_FARM_BASTION_PRIVATE_KEY" | tr -d '\r' > ~/.ssh/itp/tpvision/win10-bastion-ghent
+    - chmod -R 600 ~/.ssh/itp/tpvision/*
+
+.bootstrap_displays:
+  parallel:
+    matrix:
+      - DISPLAY_NAME: 'ITP Ghent 1' #BDL3550Q
+        DISPLAY_ID: '98a75f95-7483-42bb-9f31-58e8b6a3c83b'
+        BOOTSTRAP_VERSIONS: '1.82.3 stable alpha'
+      - DISPLAY_NAME: '260 - BDL3052E' #embedded
+        DISPLAY_ID: '2b417f95-df0c-48ff-9c13-a2514e23d334'
+        BOOTSTRAP_VERSIONS: 'stable'
+      - DISPLAY_NAME: '281 - BDL4052E' #embedded
+        DISPLAY_ID: '79e99195-8f3a-416b-a90e-7e7278685b21'
+        BOOTSTRAP_VERSIONS: 'stable'
+      - DISPLAY_NAME: '262 - BDL3651T'
+        DISPLAY_ID: 'e3ac868f-320f-45f9-8e77-2d3e87f0a98a'
+        BOOTSTRAP_VERSIONS: '1.82.3 stable alpha'
+      - DISPLAY_NAME: '138 - 10BDL4551T' #embedded
+        DISPLAY_ID: 'c702ff71-419b-4327-872c-c14b51d78983'
+        BOOTSTRAP_VERSIONS: 'stable'
+      - DISPLAY_NAME: '287 - BDL4650D' #embedded
+        DISPLAY_ID: 'bea13576-01a1-4d0b-97a9-415ef708cb8c'
+        BOOTSTRAP_VERSIONS: 'stable'
+      - DISPLAY_NAME: '266 - BDL3050S' #embedded
+        DISPLAY_ID: '73ee9f2e-d1a3-40f8-999c-8e7e4aaadf2c'
+        BOOTSTRAP_VERSIONS: 'stable'
+      - DISPLAY_NAME: 'NEW - BDL4052E-02' #embedded
+        DISPLAY_ID: 'cfe02659-dcc1-4e9c-8f08-995458063c0f'
+        BOOTSTRAP_VERSIONS: '1.113.0 stable alpha'
+      - DISPLAY_NAME: '224 - BDL3652T' #embedded
+        DISPLAY_ID: '97e31523-b8f9-466a-b48d-420120d6f966'
+        BOOTSTRAP_VERSIONS: 'stable'
+
+      #- DISPLAY_NAME: '105 - BDL3552T' #embedded
+      #  DISPLAY_ID: 'f5f99b75-71e4-4c27-99a4-61f5909656b8'
+      #  BOOTSTRAP_VERSIONS: 'stable'
+      #- DISPLAY_NAME: 'ITP Leuven 2' #BDL4550D #embedded
+      #  DISPLAY_ID: '03726f69-9238-4baf-837c-edbb99338f24'
+      #  BOOTSTRAP_VERSIONS: 'stable'
+      #- DISPLAY_NAME: '158 - BDL4550D' #embedded
+      #  DISPLAY_ID: '406c5059-6b6f-4155-a2f3-7ba824e21c4c'
+      #  BOOTSTRAP_VERSIONS: 'stable'
+      # - DISPLAY_NAME: '289 - BDL3650QE'
+      #   DISPLAY_ID: '5be858f2-e012-41eb-8be9-701910a6d6dd'
+      #   BOOTSTRAP_VERSIONS: '1.90.0 stable alpha'
+      # - DISPLAY_NAME: '042 - BDL3550Q' #embedded
+      #   DISPLAY_ID: 'e9289e19-1a69-44a7-9b5c-38baec0857f5'
+      #   BOOTSTRAP_VERSIONS: 'stable'
+      # - DISPLAY_NAME: '165 - BDL3452T'
+      #   DISPLAY_ID: '4d53814a-8e6b-4363-91e7-e37ae3b888dc'
+      #   BOOTSTRAP_VERSIONS: '1.65.0 stable alpha'
+
+lint:
+  stage: lint
+  only:
+    - merge_requests
+  script:
+    - yarn install --frozen-lockfile
+    - yarn prettier -c **/*.ts
+
+e2e_tests_simulator:
+  stage: test
+  cache:
+    paths:
+      - ./history/
+  only:
+    refs:
+      - merge_requests
+  script:
+    - yarn install --frozen-lockfile
+    - yarn codegen
+    - yarn test -- -t 'Happy Path scenario'
+  artifacts:
+    when: always
+    paths:
+      - ./reports/
+      - ./history/
+    expire_in: 30 days
+
+e2e_tests:
+  stage: test
+  cache:
+    paths:
+      - ./history/
+  only:
+    refs:
+      - schedules
+    variables:
+      - $SCHEDULE_NAME == "E2E_Tests_Real_Displays"
+  script:
+    - yarn install --frozen-lockfile
+    - yarn codegen
+    - yarn test -- -t 'Happy Path scenario'
+  artifacts:
+    when: always
+    paths:
+      - ./reports/
+      - ./history/
+    expire_in: 30 days
+
+power_schedule_tests:
+  stage: test
+  cache:
+    paths:
+      - ./history/
+  only:
+    refs:
+      - schedules
+    variables:
+      - $SCHEDULE_NAME == "Power_Schedule_Test"
+  script:
+    - yarn install --frozen-lockfile
+    - yarn codegen
+    - yarn test -- -t 'Automated power schedule' --runInBand
+  artifacts:
+    when: always
+    paths:
+      - ./reports/
+      - ./history/
+    expire_in: 30 days
+
+pages:
+  stage: deploy
+  when: always
+  dependencies:
+    - e2e_tests
+  only:
+    refs:
+      - schedules
+    variables:
+      - $SCHEDULE_NAME == "E2E_tests_Real_Displays"
+  script:
+    - mv ./reports/ public/
+  artifacts:
+    paths:
+      - public
+    expire_in: 30 days
+
+.bootstrap_test:
+  extends:
+    - .adb
+  script:
+    - cd bootstrap
+    - |
+      failed_test=false
+      failed_bootstrap_versions=
+      for BOOTSTRAP_VERSION in $BOOTSTRAP_VERSIONS
+        do
+          echo "*** Start bootstrap testing: version ${BOOTSTRAP_VERSION} on ${DISPLAY_NAME} ***"
+          if ./installBootstrap.sh ${DISPLAY_ID} ${BOOTSTRAP_VERSION}; then
+            echo "*** Success: version ${BOOTSTRAP_VERSION} on ${DISPLAY_NAME}"
+          else
+            echo "*** Failure: version ${BOOTSTRAP_VERSION} on ${DISPLAY_NAME}"
+            failed_test=true
+            failed_bootstrap_versions="${failed_bootstrap_versions} ${BOOTSTRAP_VERSION}"
+          fi
+          echo "*** End bootstrap testing: version ${BOOTSTRAP_VERSION} on ${DISPLAY_NAME} ***"
+        done
+      if [ "$failed_test" = true ]; then
+        if [ -z "${MANUAL_JOB_NAME+x}" ]; then
+          failed_bootstrap_versions=$(echo $failed_bootstrap_versions | awk '{$1=$1};1')
+          MESSAGE="*Bootstrap test on \`$DISPLAY_NAME\` failed for versions: \`$failed_bootstrap_versions\`*" \
+          CI_PIPELINE_STATUS="failed" \
+          bash ${CI_PROJECT_DIR}/ci/scripts/slackNotification.sh
+        fi
+        exit 1
+      fi
+  tags:
+    - tpvision
+  artifacts:
+    when: always
+    paths:
+      - ./bootstrap/screenrecord-*.mp4
+      - ./bootstrap/logcat-*.txt
+    expire_in: 30 days
+  allow_failure: true
+
+scheduled_bootstrap_test:
+  stage: bootstrap
+  extends:
+    - .bootstrap_displays
+    - .bootstrap_test
+  only:
+    refs:
+      - schedules
+    variables:
+      - $SCHEDULE_NAME == "Bootstrap"
+
+manual_bootstrap_test:
+  stage: bootstrap
+  extends:
+    - .bootstrap_test
+  only:
+    variables:
+      - $MANUAL_JOB_NAME == "Bootstrap"

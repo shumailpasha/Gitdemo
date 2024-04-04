@@ -1,0 +1,15 @@
+overwrite: true
+schema: 'https://api.wave.ppds.com/schema.graphql'
+documents: ./**/*.graphql
+generates:
+  apiClient/sdk.ts:
+    plugins:
+      - typescript
+      - typescript-operations
+      - typescript-graphql-request
+config:
+  scalars:
+    Date: string
+
+# The codegen.yml file is a configuration file used by tools like GraphQL Code Generator to generate TypeScript code based on your GraphQL schema and query documents.
+# This configuration is set up to generate TypeScript code for a GraphQL API, including types, operations, and client-side code to interact with the API using the graphql-request library. The Date scalar is explicitly mapped to the TypeScript string type.

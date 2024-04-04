@@ -1,0 +1,13 @@
+.DS_Store
+
+node_modules
+reports
+sdk.ts
+.env
+history/history.json
+*.apk
+bootstrap/*.mp4
+bootstrap/*.txt
+
+
+# The .gitignore file is used to specify intentionally untracked files and directories that Git should ignore. This means that these files and directories will not be staged or committed to the Git repository. It is commonly used to avoid adding files that are specific to a developer's environment, build artifacts, or files that should not be version-controlled.
