@@ -8,12 +8,14 @@ import UpdatePowerSchedule from './tests/UpdatePowerSchedule';
 
 jest.setTimeout(90_000);
 
+// const fs = require('fs');
+// const path = require('path');
+
 const fs = require('fs');
 const path = require('path');
 
-
-const fs = require('fs');
-const path = require('path');
+// const fs = require('fs');
+// const path = require('path');
 /*
 global is a global object in Node.js, similar to window in a browser environment.
 __DISPLAYS__ is a variable or property attached to the global object. It seems to hold an array of display data.
